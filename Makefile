@@ -8,9 +8,9 @@ XLEN	:=	$(shell $(CC) -dM -E - < /dev/null | grep '__riscv_xlen' | awk '{print $
 CFLAGS = -march=rv$(XLEN)gc -fPIC -fno-stack-protector -O0
 TARGET = zero_stage_boot
 ${TARGET}.elf: start.o feature.o jump.o
-	$(LD) $(CROSS_LDFLAGS) -Tlink.lds $^ -o $@
+	$(LD) $(CROSS_LDFLAGS) -Tlink.lds --cref -Map=${TARGET}.map  $^ -o $@
 	$(OBJCOPY) -O binary $@ ${TARGET}.bin
-	$(OBJDUMP) -S $@ > ${TARGET}.asm
+	$(OBJDUMP) -S -D -z -x $@ > ${TARGET}.asm
 
 %.o: %.c
 	$(CC) -mcmodel=medany ${CFLAGS} -g -c $^
@@ -19,4 +19,4 @@ start.o: start.S
 	$(CC) ${CFLAGS} -g -c $^
 
 clean:
-	-rm -rf *.o *.bin *.elf *.asm
+	-rm -rf *.o *.bin *.elf *.asm *.map
